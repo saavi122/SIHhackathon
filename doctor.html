@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rural Health Care Network</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --muted: #f4f7f8;
+      --text: #0b1320;
+      --muted-text:#64748b;
+      --border:#e5e7eb;
+      --primary:#1e9e7b;
+      --primary-600:#178a6b;
+      --ring:#1e9e7b;
+      --danger:#ef4444;
+      --radius:12px;
+      --shadow:0 1px 1px rgba(16,24,40,.04),0 8px 32px rgba(16,24,40,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:var(--bg);
+    }
+    .app{display:grid;grid-template-columns:260px 1fr;min-height:100dvh}
+    /* Sidebar */
+    .sidebar{
+      border-right:1px solid var(--border);
+      background: #fafafa;
+      display:flex;flex-direction:column;gap:16px
+    }
+    .sidebar .brand{padding:16px 20px;font-weight:800}
+    .nav{padding:8px}
+    .nav a{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:10px;color:var(--text);
+      text-decoration:none;font-weight:600;font-size:14px
+    }
+    .nav a:hover{background:var(--muted)}
+    .nav a.active{background:#eaf7f3;color:#0a3a2f}
+    .nav .icon{width:18px;height:18px;color:#0f172a;opacity:.8}
+    .sidebar .foot{margin-top:auto;padding:10px 14px;color:var(--muted-text);font-size:12px}
+    /* Header */
+    .main{display:flex;flex-direction:column}
+    .topbar{
+      position:sticky;top:0;background:rgba(255,255,255,.7);
+      backdrop-filter:saturate(180%) blur(10px);
+      border-bottom:1px solid var(--border);
+      z-index:10
+    }
+    .topbar .row{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 20px;gap:16px
+    }
+    .title{font-weight:800;letter-spacing:-.02em}
+    .title .accent{color:var(--primary)}
+    .idchip{background:var(--muted);border-radius:8px;padding:4px 8px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      background:#fff;border:1px solid var(--border);
+      padding:8px 12px;border-radius:10px;cursor:pointer;
+      font-weight:600;color:var(--text)
+    }
+    .btn:hover{background:#f9fafb}
+    .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .btn.primary:hover{background:var(--primary-600)}
+    .container{padding:24px 24px 40px;max-width:1200px;width:100%}
+    /* Cards */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card-h{padding:16px 20px;border-bottom:1px solid var(--border)}
+    .card-h h3{margin:0;font-size:20px}
+    .card-c{padding:16px 20px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    /* Appointments rows */
+    .appt{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff}
+    .pill{display:inline-flex;align-items:center;border-radius:999px;border:1px solid var(--border);font-size:12px;padding:4px 10px}
+    .pill.scheduled{background:#eaf7f3;color:#0a3a2f;border-color:#d8eee8}
+    .pill.urgent{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+    .pill.completed{background:#eef2ff;color:#1f3a8a;border-color:#e5e7ff}
+    .muted{color:var(--muted-text)}
+    .row-xs{display:flex;gap:14px;color:var(--muted-text);margin-top:6px;font-size:12px}
+    /* Patients */
+    .header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+    th{font-size:12px;color:var(--muted-text);text-transform:uppercase;letter-spacing:.04em}
+    td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.4);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal{width:min(720px,100%);background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow)}
+    .modal .modal-h{padding:16px 20px;border-bottom:1px solid var(--border);font-weight:700}
+    .modal .modal-c{padding:16px 20px}
+    .form{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .form .field{display:flex;flex-direction:column;gap:8px}
+    label{font-size:12px;color:var(--muted-text)}
+    input,select{
+      border:1px solid var(--border);border-radius:10px;padding:10px 12px;font:inherit
+    }
+    input:focus,select:focus{outline:2px solid var(--ring);outline-offset:1px;border-color:transparent}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+    /* Pages */
+    .page{display:none}
+    .page.active{display:block}
+    /* Icons (simple) */
+    svg{display:block}
+    .i-user{width:18px;height:18px}
+    .i-user path{fill:currentColor}
+    .i-calendar,.i-clock{width:18px;height:18px;stroke:currentColor;stroke-width:1.5;fill:none}
+    .chip{font-size:14px}
+    /* Responsive */
+    @media (max-width: 960px){
+      .app{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .grid-2{grid-template-columns:1fr}
+      .form{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">Rural Health</div>
+      <nav class="nav" id="nav">
+        <a href="#dashboard" data-target="dashboard" class=""><span class="icon">🏠</span>Dashboard</a>
+        <a href="#patients" data-target="patients"><span class="icon">👥</span>Patients</a>
+        <a href="#appointments" data-target="appointments" class="active"><span class="icon">📆</span>Appointments</a>
+        <a href="#notifications" data-target="notifications"><span class="icon">🔔</span>Notifications</a>
+      </nav>
+      <div class="foot">© 2025 Rural Health</div>
+    </aside>
+
+    <div class="main">
+      <div class="topbar">
+        <div class="row">
+          <div class="title"><span class="accent">Rural Health</span> Care Network</div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="text-align:right">
+              <div class="muted" style="font-size:13px">Welcome,</div>
+              <div style="font-weight:700">Dr. Smith</div>
+            </div>
+            <span class="idchip">DOC-2025-1123</span>
+            <button class="btn" title="Notifications">🔔</button>
+            <button class="btn" id = "logoutBtn">↪ Logout</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- Dashboard (simple metrics) -->
+        <section id="dashboard" class="page">
+          <div class="header-row">
+            <div>
+              <h1 style="margin:0 0 6px 0">Rural Health</h1>
+              <div class="muted chip">Welcome, Dr. Smith • <span class="idchip" style="padding:2px 6px">DOC-2025-1123</span></div>
+            </div>
+          </div>
+          <div class="grid-2" style="grid-template-columns:repeat(4,1fr);gap:12px">
+            <div class="card"><div class="card-c"><div class="muted" style="font-size:12px">Total Patients</div><div style="font-weight:800;font-size:28px">990</div></div></div>
+            <div class="card"><div class="card-c"><div class="muted" style="font-size:12px">New Patients</div><div style="font-weight:800;font-size:28px">67</div></div></div>
+            <div class="card"><div class="card-c"><div class="muted" style="font-size:12px">Old Patients</div><div style="font-weight:800;font-size:28px">27</div></div></div>
+            <div class="card"><div class="card-c"><div class="muted" style="font-size:12px">Appointments Today</div><div style="font-weight:800;font-size:28px">3</div></div></div>
+          </div>
+
+          <div class="grid-2" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Analytics</h3><div class="muted" style="font-size:12px;margin-top:6px">Line Chart (Patients Growth)</div></div>
+              <div class="card-c"><canvas id="lineChart" height="120"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>Patients Today</h3></div>
+              <div class="card-c">
+                <div class="appt"><div><div style="font-weight:600">Sarah Hostemn</div><div class="muted" style="font-size:12px">Diagnosis: Bronchi</div></div></div>
+                <div style="height:8px"></div>
+                <div class="appt"><div><div style="font-weight:600">Dakota Smith</div><div class="muted" style="font-size:12px">Diagnosis: Stroke</div></div></div>
+                <div style="height:8px"></div>
+                <div class="appt"><div><div style="font-weight:600">John Lane</div><div class="muted" style="font-size:12px">Diagnosis: Liver</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top:16px">
+            <div class="card">
+              <div class="card-h"><h3>Appointments Overview</h3></div>
+              <div class="card-c">
+                <div class="header-row" style="margin:0"><span>Overall Appointments</span><strong>3</strong></div>
+                <div class="header-row" style="margin:8px 0 12px 0"><span>Upcoming Appointments</span><strong>3</strong></div>
+                <div class="appt"><div><div style="font-weight:600">Shawn Hampton</div><div class="muted" style="font-size:12px">Emergency Appointment</div></div><span class="pill scheduled">On track</span></div>
+                <div style="height:8px"></div>
+                <div class="appt"><div><div style="font-weight:600">Polly Paul</div><div class="muted" style="font-size:12px">USG + Consultation</div></div><span class="pill scheduled">Scheduled</span></div>
+                <div style="height:8px"></div>
+                <div class="appt"><div><div style="font-weight:600">John Doe</div><div class="muted" style="font-size:12px">Laboratory Screening</div></div><span class="pill scheduled">Scheduled</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>Recent Questions</h3></div>
+              <div class="card-c">
+                <div class="muted" style="font-size:12px">14 Jun 2025</div>
+                <div>Addiction blood bank bone marrow contagious disinfectants?</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Patients -->
+        <section id="patients" class="page">
+          <div class="header-row">
+            <div>
+              <h1 style="margin:0 0 6px 0">Patients</h1>
+              <div class="muted">Complete patient directory</div>
+            </div>
+            <button id="openModalTop" class="btn primary">＋ Add Patient</button>
+          </div>
+
+          <div class="card">
+            <div class="card-h" style="display:flex;align-items:center;justify-content:space-between">
+              <h3>Patient Details</h3>
+              <button id="openModal" class="btn">＋ Add Patient</button>
+            </div>
+            <div class="card-c">
+              <div style="overflow:auto">
+                <table id="patientsTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Diagnosis</th><th>Last Visit</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Appointments -->
+        <section id="appointments" class="page active">
+          <h1 style="margin-top:0">Appointments</h1>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-h"><h3 style="display:flex;justify-content:space-between;align-items:center">Upcoming Appointments <span class="muted" style="font-weight:600" id="upCount">3</span></h3></div>
+              <div class="card-c" id="upcoming"></div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3 style="display:flex;justify-content:space-between;align-items:center">Past Appointments <span class="muted" style="font-weight:600" id="pastCount">3</span></h3></div>
+              <div class="card-c" id="past"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Notifications -->
+        <section id="notifications" class="page">
+          <div class="card">
+            <div class="card-h"><h3>Notifications</h3></div>
+            <div class="card-c">No notifications yet.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Patient Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addPatientTitle">
+      <div class="modal-h" id="addPatientTitle">Add Patient</div>
+      <div class="modal-c">
+        <form id="patientForm">
+          <div class="form">
+            <div class="field">
+              <label>ID</label>
+              <input id="f-id" type="text" disabled />
+            </div>
+            <div class="field">
+              <label>Name</label>
+              <input id="f-name" required />
+            </div>
+            <div class="field">
+              <label>Age</label>
+              <input id="f-age" type="number" min="0" max="150" required />
+            </div>
+            <div class="field">
+              <label>Gender</label>
+              <select id="f-gender" required>
+                <option value="">Select</option>
+                <option>Male</option><option>Female</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label>Diagnosis</label>
+              <input id="f-diagnosis" required />
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label>Last Visit</label>
+              <input id="f-last" type="date" required />
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn" id="cancel">Cancel</button>
+            <button class="btn primary" type="submit">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Navigation
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const nav = document.getElementById('nav');
+    function activate(target){
+      pages.forEach(p=>p.classList.toggle('active', p.id===target));
+      nav.querySelectorAll('a').forEach(a=>a.classList.toggle('active', a.dataset.target===target));
+    }
+    nav.addEventListener('click', (e)=>{
+      const a = e.target.closest('a[data-target]');
+      if(!a) return;
+      e.preventDefault();
+      activate(a.dataset.target);
+      history.replaceState(null,'','#'+a.dataset.target);
+    });
+    if(location.hash && document.getElementById(location.hash.slice(1))) activate(location.hash.slice(1));
+
+    // Simple line chart
+    (function(){
+      const canvas = document.getElementById('lineChart');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width = canvas.clientWidth;
+      const h = canvas.height = 160;
+      const data = [720,760,810,860,920,990];
+      const max = Math.max(...data)*1.1;
+      const stepX = w/(data.length-1);
+      ctx.clearRect(0,0,w,h);
+      // grid
+      ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth=1;
+      for(let i=1;i<5;i++){ const y=h*(i/5); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+      // line
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary'); 
+      ctx.lineWidth=3; ctx.beginPath();
+      data.forEach((v,i)=>{ const x=i*stepX; const y=h - (v/max)*h; i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+      ctx.stroke();
+    })();
+
+    // Appointments data
+    const upcoming = [
+      { name:'Shawn Hampton', type:'Emergency Appointment', date:'2025-06-15', time:'10:30 AM', status:'Urgent' },
+      { name:'Polly Paul', type:'USG + Consultation', date:'2025-06-16', time:'2:00 PM', status:'Scheduled' },
+      { name:'John Doe', type:'Laboratory Screening', date:'2025-06-17', time:'9:00 AM', status:'Scheduled' },
+    ];
+    const past = [
+      { name:'Sarah Hostemn', type:'Follow-up', date:'2025-06-13', time:'11:00 AM', status:'Completed' },
+      { name:'Dakota Smith', type:'Neurology Consultation', date:'2025-06-10', time:'3:30 PM', status:'Completed' },
+      { name:'John Lane', type:'Hepatology Review', date:'2025-06-12', time:'4:15 PM', status:'Completed' },
+    ];
+    function iconUser(){
+      return `<svg class="i-user" viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5Z"/></svg>`;
+    }
+    function iconCal(){ 
+      return `<svg class="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`; 
+    }
+    function iconClock(){ 
+      return `<svg class="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg>`; 
+    }
+    function rowTemplate(a){
+      const badgeClass = a.status==='Urgent' ? 'pill urgent' : a.status==='Completed' ? 'pill completed' : 'pill scheduled';
+      return `<div class="appt">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="pill scheduled" style="width:36px;height:36px;display:grid;place-items:center;border-radius:999px">${iconUser()}</div>
+          <div>
+            <div style="font-weight:600">${a.name} <span class="muted">• ${a.type}</span></div>
+            <div class="row-xs"><span>${iconCal()} ${a.date}</span><span>${iconClock()} ${a.time}</span></div>
+          </div>
+        </div>
+        <span class="${badgeClass}">${a.status}</span>
+      </div>`;
+    }
+    document.getElementById('upcoming').innerHTML = upcoming.map(rowTemplate).join('');
+    document.getElementById('past').innerHTML = past.map((a,i)=> rowTemplate(a) + (i<past.length-1?'<div style="height:8px"></div>':'')).join('');
+    document.getElementById('upCount').textContent = upcoming.length;
+    document.getElementById('pastCount').textContent = past.length;
+
+    // Patients with localStorage
+    const STORAGE='rural-health:patients';
+    const seed=[{id:'P-001',name:'Sarah Hostemn',age:32,gender:'Female',diagnosis:'Bronchi',lastVisit:'2025-06-13'},
+                {id:'P-002',name:'Dakota Smith',age:58,gender:'Male',diagnosis:'Stroke',lastVisit:'2025-06-10'},
+                {id:'P-003',name:'John Lane',age:46,gender:'Male',diagnosis:'Liver',lastVisit:'2025-06-12'},
+                {id:'P-004',name:'Polly Paul',age:29,gender:'Female',diagnosis:'USG + Consultation',lastVisit:'2025-06-11'},
+                {id:'P-005',name:'John Doe',age:40,gender:'Male',diagnosis:'Laboratory Screening',lastVisit:'2025-06-09'}];
+    let patients = (()=>{ try{ return JSON.parse(localStorage.getItem(STORAGE)) || seed }catch{ return seed } })();
+    function save(){ localStorage.setItem(STORAGE, JSON.stringify(patients)); }
+    function nextId(){
+      const max = patients.reduce((a,p)=>Math.max(a, parseInt((p.id||'').split('-')[1])||0),0);
+      return `P-${String(max+1).padStart(3,'0')}`;
+    }
+    function renderPatients(){
+      const tb = document.querySelector('#patientsTable tbody');
+      tb.innerHTML = patients.map(p=>`<tr>
+        <td class="mono">${p.id}</td><td><strong>${p.name}</strong></td>
+        <td>${p.age}</td><td>${p.gender}</td><td>${p.diagnosis}</td><td>${p.lastVisit}</td>
+      </tr>`).join('');
+    }
+    renderPatients();
+
+    // Modal handlers
+    const modal = document.getElementById('modal');
+    function openModal(){
+      document.getElementById('f-id').value = nextId();
+      modal.style.display='flex';
+      document.body.style.overflow = 'hidden'; // Prevent body scroll
+      setTimeout(()=>modal.querySelector('#f-name').focus(),0);
+    }
+    function closeModal(){ 
+      modal.style.display='none'; 
+      document.body.style.overflow = ''; // Restore body scroll
+    }
+    document.getElementById('openModal').onclick = openModal;
+    document.getElementById('openModalTop').onclick = openModal;
+    document.getElementById('cancel').onclick = closeModal;
+    modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+    // ESC key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        closeModal();
+      }
+    });
+
+    document.getElementById('patientForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const p = {
+        id: document.getElementById('f-id').value,
+        name: document.getElementById('f-name').value.trim(),
+        age: parseInt(document.getElementById('f-age').value,10),
+        gender: document.getElementById('f-gender').value,
+        diagnosis: document.getElementById('f-diagnosis').value.trim(),
+        lastVisit: document.getElementById('f-last').value
+      };
+      if(!p.name || !p.age || !p.gender || !p.diagnosis || !p.lastVisit) return;
+      patients = [{...p}, ...patients];
+      save(); renderPatients(); closeModal();
+      e.target.reset();
+    });
+    // Logout button
+const logoutBtn = document.getElementById('logoutBtn');
+logoutBtn.addEventListener('click', () => {
+  if (confirm('Are you sure you want to logout?')) {
+    window.location.href = "login.html"; // Redirect to login page
+  }
+});
+
+  </script>
+</body>
+</html>
