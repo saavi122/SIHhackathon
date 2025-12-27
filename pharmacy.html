@@ -167,7 +167,7 @@
         </div>
 
         <!-- Charts (Backend Placeholder) -->
-        <div class="grid-2">
+        <!-- <div class="grid-2">
             <div class="chart-box">
                 <h3>Sales Analytics</h3>
                 <div class="chart-placeholder">[ Backend Data Placeholder ]</div>
@@ -176,7 +176,20 @@
                 <h3>Patient by Gender</h3>
                 <div class="chart-placeholder">[ Backend Data Placeholder ]</div>
             </div>
-        </div>
+        </div> -->
+
+        <div class="grid-2">
+    <div class="chart-box">
+        <h3>Sales Analytics</h3>
+        <canvas id="salesChart"></canvas>
+    </div>
+
+    <div class="analytics">
+        <h3>Patient by Gender</h3>
+        <canvas id="genderChart"></canvas>
+    </div>
+</div>
+
 
         <!-- Orders -->
         <div class="orders">
@@ -249,59 +262,68 @@
         }
     });
 
-   
-    /* ============================
-       DEMO BACKEND DATA (TEMP)
-       ============================ */
+    /* =======================
+   SALES ANALYTICS CHART
+   ======================= */
+const salesCtx = document.getElementById('salesChart');
 
-    // Sales Analytics (Monthly)
-    const salesData = {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+new Chart(salesCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
         datasets: [{
-            label: "Sales (₹)",
-            data: [12000, 19000, 14000, 22000, 18000, 26000],
-            backgroundColor: "rgba(32, 201, 151, 0.2)",
-            borderColor: "#20c997",
-            borderWidth: 2,
+            label: 'Monthly Sales (₹)',
+            data: [12000, 18000, 15000, 22000, 20000, 26000],
+            borderColor: '#20c997',
+            backgroundColor: 'rgba(32, 201, 151, 0.2)',
+            fill: true,
             tension: 0.4,
-            fill: true
+            pointRadius: 4
         }]
-    };
-
-    new Chart(document.getElementById("salesChart"), {
-        type: "line",
-        data: salesData,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-
-    // Patient by Gender
-    const genderData = {
-        labels: ["Male", "Female", "Other"],
-        datasets: [{
-            data: [55, 40, 5],
-            backgroundColor: ["#20c997", "#0f766e", "#6b7280"]
-        }]
-    };
-
-    new Chart(document.getElementById("genderChart"), {
-        type: "doughnut",
-        data: genderData,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: "bottom"
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                ticks: {
+                    callback: value => '₹' + value
                 }
             }
         }
-    });
+    }
+});
+
+/* =======================
+   PATIENT BY GENDER CHART
+   ======================= */
+const genderCtx = document.getElementById('genderChart');
+
+new Chart(genderCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Male', 'Female', 'Other'],
+        datasets: [{
+            data: [55, 40, 5],
+            backgroundColor: ['#20c997', '#0f766e', '#6b7280'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        cutout: '65%'
+    }
+});
+   
+   
 </script>
 
 </body>
 </html>
-
