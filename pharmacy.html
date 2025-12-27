@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pharmacy Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
@@ -247,7 +248,60 @@
             window.location.href = "login.html";
         }
     });
+
+   
+    /* ============================
+       DEMO BACKEND DATA (TEMP)
+       ============================ */
+
+    // Sales Analytics (Monthly)
+    const salesData = {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [{
+            label: "Sales (₹)",
+            data: [12000, 19000, 14000, 22000, 18000, 26000],
+            backgroundColor: "rgba(32, 201, 151, 0.2)",
+            borderColor: "#20c997",
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+        }]
+    };
+
+    new Chart(document.getElementById("salesChart"), {
+        type: "line",
+        data: salesData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // Patient by Gender
+    const genderData = {
+        labels: ["Male", "Female", "Other"],
+        datasets: [{
+            data: [55, 40, 5],
+            backgroundColor: ["#20c997", "#0f766e", "#6b7280"]
+        }]
+    };
+
+    new Chart(document.getElementById("genderChart"), {
+        type: "doughnut",
+        data: genderData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            }
+        }
+    });
 </script>
 
 </body>
 </html>
+
